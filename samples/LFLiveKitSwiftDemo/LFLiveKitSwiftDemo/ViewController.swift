@@ -16,7 +16,7 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         session.delegate = self
-        session.preView = self.view
+        session.previewView = self.view
         
         self.requestAccessForVideo()
         self.requestAccessForAudio()
@@ -58,10 +58,10 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
             session.running = true;
             break;
         // 用户明确地拒绝授权，或者相机设备无法访问
-        case AVAuthorizationStatus.denied: break
-        case AVAuthorizationStatus.restricted:break;
-        default:
-            break;
+        case AVAuthorizationStatus.denied:
+			break
+        case AVAuthorizationStatus.restricted:
+			break
         }
     }
     
@@ -73,15 +73,15 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
             AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (granted) in
                 
             })
-            break;
+            break
         // 已经开启授权，可继续
         case AVAuthorizationStatus.authorized:
-            break;
+            break
         // 用户明确地拒绝授权，或者相机设备无法访问
-        case AVAuthorizationStatus.denied: break
-        case AVAuthorizationStatus.restricted:break;
-        default:
-            break;
+        case AVAuthorizationStatus.denied:
+			break
+        case AVAuthorizationStatus.restricted:
+			break
         }
     }
     
@@ -89,10 +89,10 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     
     // 回调
     func liveSession(_ session: LFLiveSession?, debugInfo: LFLiveDebug?) {
-        print("debugInfo: \(debugInfo?.currentBandwidth)")
+		print("debugInfo: \(String(describing: debugInfo?.currentBandwidth))")
     }
     
-    func liveSession(_ session: LFLiveSession?, errorCode: LFLiveSocketErrorCode) {
+    func liveSession(_ session: LFLiveSession?, errorCode: LFLiveSocketError) {
         print("errorCode: \(errorCode.rawValue)")
     }
     
@@ -126,7 +126,7 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         startLiveButton.isSelected = !startLiveButton.isSelected;
         if (startLiveButton.isSelected) {
             startLiveButton.setTitle("结束直播", for: UIControlState())
-            let stream = LFLiveStreamInfo()
+			let stream = LFStreamInfo()
             stream.url = "rtmp://live.hkstv.hk.lxdns.com:1935/live/stream153"
             session.startLive(stream)
         } else {
@@ -137,12 +137,10 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     
     // 美颜
     func didTappedBeautyButton(_ button: UIButton) -> Void {
-        session.beautyFace = !session.beautyFace;
-        beautyButton.isSelected = !session.beautyFace
     }
     
     // 摄像头
-    func didTappedCameraButton(_ button: UIButton) -> Void {
+	func didTappedCameraButton(_ button: UIButton) -> Void {
         let devicePositon = session.captureDevicePosition;
         session.captureDevicePosition = (devicePositon == AVCaptureDevicePosition.back) ? AVCaptureDevicePosition.front : AVCaptureDevicePosition.back;
     }
@@ -156,8 +154,8 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     
     //  默认分辨率368 ＊ 640  音频：44.1 iphone6以上48  双声道  方向竖屏
     var session: LFLiveSession = {
-        let audioConfiguration = LFLiveAudioConfiguration.defaultConfiguration(for: LFLiveAudioQuality.high)
-        let videoConfiguration = LFLiveVideoConfiguration.defaultConfiguration(for: LFLiveVideoQuality.low3)
+		let audioConfiguration = LFAudioConfiguration.defaultConfiguration(for: LFAudioQuality.high)
+		let videoConfiguration = LFVideoConfiguration.defaultConfiguration(for: LFVideoQuality.low3)
         let session = LFLiveSession(audioConfiguration: audioConfiguration, videoConfiguration: videoConfiguration)
         return session!
     }()
@@ -208,8 +206,7 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         startLiveButton.setTitleColor(UIColor.black, for:UIControlState())
         startLiveButton.setTitle("开始直播", for: UIControlState())
         startLiveButton.titleLabel!.font = UIFont.systemFont(ofSize: 14)
-        startLiveButton.backgroundColor = UIColor(colorLiteralRed: 50, green: 32, blue: 245, alpha: 1)
+        startLiveButton.backgroundColor = UIColor(red: 40, green: 32, blue: 245, alpha: 1)
         return startLiveButton
     }()
 }
-
