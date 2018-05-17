@@ -24,12 +24,10 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         self.view.addSubview(containerView)
         containerView.addSubview(stateLabel)
         containerView.addSubview(closeButton)
-        containerView.addSubview(beautyButton)
         containerView.addSubview(cameraButton)
         containerView.addSubview(startLiveButton)
-    
-        cameraButton.addTarget(self, action: #selector(didTappedCameraButton(_:)), for:.touchUpInside)
-        beautyButton.addTarget(self, action: #selector(didTappedBeautyButton(_:)), for: .touchUpInside)
+
+		cameraButton.addTarget(self, action: #selector(didTappedCameraButton(_:)), for:.touchUpInside)
         startLiveButton.addTarget(self, action: #selector(didTappedStartLiveButton(_:)), for: .touchUpInside)
     }
     
@@ -122,7 +120,7 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     //MARK: - Events
     
     // 开始直播
-    func didTappedStartLiveButton(_ button: UIButton) -> Void {
+	@objc func didTappedStartLiveButton(_ button: UIButton) -> Void {
         startLiveButton.isSelected = !startLiveButton.isSelected;
         if (startLiveButton.isSelected) {
             startLiveButton.setTitle("结束直播", for: UIControlState())
@@ -135,12 +133,8 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         }
     }
     
-    // 美颜
-    func didTappedBeautyButton(_ button: UIButton) -> Void {
-    }
-    
     // 摄像头
-	func didTappedCameraButton(_ button: UIButton) -> Void {
+	@objc func didTappedCameraButton(_ button: UIButton) -> Void {
         let devicePositon = session.captureDevicePosition;
         session.captureDevicePosition = (devicePositon == AVCaptureDevice.Position.back) ? AVCaptureDevice.Position.front : AVCaptureDevice.Position.back;
     }
@@ -189,14 +183,6 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
         let cameraButton = UIButton(frame: CGRect(x: UIScreen.main.bounds.width - 54 * 2, y: 20, width: 44, height: 44))
         cameraButton.setImage(UIImage(named: "camra_preview"), for: UIControlState())
         return cameraButton
-    }()
-    
-    // 摄像头
-    var beautyButton: UIButton = {
-        let beautyButton = UIButton(frame: CGRect(x: UIScreen.main.bounds.width - 54 * 3, y: 20, width: 44, height: 44))
-        beautyButton.setImage(UIImage(named: "camra_beauty"), for: UIControlState.selected)
-        beautyButton.setImage(UIImage(named: "camra_beauty_close"), for: UIControlState())
-        return beautyButton
     }()
     
     // 开始直播按钮

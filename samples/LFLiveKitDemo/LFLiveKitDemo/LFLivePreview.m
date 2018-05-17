@@ -32,7 +32,6 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 
 @interface LFLivePreview ()<LFLiveSessionDelegate>
 
-@property (nonatomic, strong) UIButton *beautyButton;
 @property (nonatomic, strong) UIButton *cameraButton;
 @property (nonatomic, strong) UIButton *closeButton;
 @property (nonatomic, strong) UIButton *startLiveButton;
@@ -54,7 +53,6 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
         [self.containerView addSubview:self.stateLabel];
         [self.containerView addSubview:self.closeButton];
         [self.containerView addSubview:self.cameraButton];
-        [self.containerView addSubview:self.beautyButton];
         [self.containerView addSubview:self.startLiveButton];
     }
     return self;
@@ -340,23 +338,6 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
         }];
     }
     return _cameraButton;
-}
-
-- (UIButton *)beautyButton {
-    if (!_beautyButton) {
-        _beautyButton = [UIButton new];
-        _beautyButton.size = CGSizeMake(44, 44);
-        _beautyButton.origin = CGPointMake(_cameraButton.left - 10 - _beautyButton.width, 20);
-        [_beautyButton setImage:[UIImage imageNamed:@"camra_beauty"] forState:UIControlStateNormal];
-        [_beautyButton setImage:[UIImage imageNamed:@"camra_beauty_close"] forState:UIControlStateSelected];
-        _beautyButton.exclusiveTouch = YES;
-//        __weak typeof(self) _self = self;
-        [_beautyButton addBlockForControlEvents:UIControlEventTouchUpInside block:^(id sender) {
-//            _self.session.beautyFace = !_self.session.beautyFace;
-//            _self.beautyButton.selected = !_self.session.beautyFace;
-        }];
-    }
-    return _beautyButton;
 }
 
 - (UIButton *)startLiveButton {

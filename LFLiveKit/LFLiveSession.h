@@ -119,8 +119,8 @@ typedef NS_OPTIONS(NSInteger, LFCaptureTypeMask) {
 
 @property (nonatomic, copy, nullable) void (^saveLocalVideoCompletionHandler)(NSURL * _Nonnull fileUrl);
 
-- (nullable instancetype)init UNAVAILABLE_ATTRIBUTE;
-+ (nullable instancetype)new UNAVAILABLE_ATTRIBUTE;
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
++ (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
 /**
    The designated initializer. Multiple instances with the same configuration will make the
