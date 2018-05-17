@@ -41,11 +41,11 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     //MARK: AccessAuth
     
     func requestAccessForVideo() -> Void {
-        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo);
+        let status = AVCaptureDevice.authorizationStatus(for: AVMediaType.video);
         switch status  {
         // 许可对话没有出现，发起授权许可
         case AVAuthorizationStatus.notDetermined:
-            AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (granted) in
+            AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted) in
                 if(granted){
                     DispatchQueue.main.async {
                         self.session.running = true
@@ -66,11 +66,11 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     }
     
     func requestAccessForAudio() -> Void {
-        let status = AVCaptureDevice.authorizationStatus(forMediaType:AVMediaTypeAudio)
+        let status = AVCaptureDevice.authorizationStatus(for:AVMediaType.audio)
         switch status  {
         // 许可对话没有出现，发起授权许可
         case AVAuthorizationStatus.notDetermined:
-            AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (granted) in
+            AVCaptureDevice.requestAccess(for: AVMediaType.audio, completionHandler: { (granted) in
                 
             })
             break
@@ -142,7 +142,7 @@ class ViewController: UIViewController, LFLiveSessionDelegate {
     // 摄像头
 	func didTappedCameraButton(_ button: UIButton) -> Void {
         let devicePositon = session.captureDevicePosition;
-        session.captureDevicePosition = (devicePositon == AVCaptureDevicePosition.back) ? AVCaptureDevicePosition.front : AVCaptureDevicePosition.back;
+        session.captureDevicePosition = (devicePositon == AVCaptureDevice.Position.back) ? AVCaptureDevice.Position.front : AVCaptureDevice.Position.back;
     }
     
     // 关闭
