@@ -10,7 +10,7 @@
 
 @interface LFStreamRTMPSocket : NSObject <LFStreamSocket>
 
-- (nullable instancetype)init UNAVAILABLE_ATTRIBUTE;
-+ (nullable instancetype)new UNAVAILABLE_ATTRIBUTE;
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
++ (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
 @end
