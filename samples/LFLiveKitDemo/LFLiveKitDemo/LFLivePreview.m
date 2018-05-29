@@ -358,8 +358,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
             if (_self.startLiveButton.selected) {
                 [_self.startLiveButton setTitle:@"stop" forState:UIControlStateNormal];
                 LFStreamInfo *stream = [LFStreamInfo new];
-//                stream.url = @"rtmp://192.168.4.26:1935/live/te";
-				stream.url = @"rtmp://stream-staging-eu.mycujoo.tv/live/18b98ecedc10411a8fe392629949aaed";
+                stream.url = @"rtmp://192.168.4.26:1935/live/te";
+//				stream.url = @"rtmp://stream-staging-eu.mycujoo.tv/live/18b98ecedc10411a8fe392629949aaed";
                 [_self.session startLive:stream];
 							_self.session.saveLocalVideo = YES;
 							NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;

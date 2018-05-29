@@ -30,20 +30,29 @@ static const NSInteger ReconnectionIntervalSeconds = 3;
 
 static const PILI_AVal av_setDataFrame = AVC("@setDataFrame");
 static const PILI_AVal av_SDKVersion = AVC("LFLiveKit 2.4.0");
+static const PILI_AVal av_TestCaption = AVC("Test Caption");
+static const PILI_AVal av_dat = AVC("dGVzdGluZ2dnZw==");
 SAVC(onMetaData);
+SAVC(onCaption);
 SAVC(duration);
 SAVC(width);
 SAVC(height);
 SAVC(videocodecid);
 SAVC(videodatarate);
 SAVC(framerate);
+SAVC(profile);
 SAVC(audiocodecid);
 SAVC(audiodatarate);
+SAVC(onCaptionInfo);
 SAVC(audiosamplerate);
 SAVC(audiosamplesize);
 //SAVC(audiochannels);
 SAVC(stereo);
 SAVC(encoder);
+SAVC(mycujoo);
+SAVC(type);
+SAVC(text);
+SAVC(data);
 //SAVC(av_stereo);
 SAVC(fileSize);
 SAVC(avc1);
@@ -51,6 +60,9 @@ SAVC(mp4a);
 
 @interface LFStreamRTMPSocket () <LFBufferDelegate> {
     PILI_RTMP *_rtmp;
+	int cnt;
+	NSTimer *t;
+	uint16_t latestTimestamp;
 }
 
 @property (nonatomic, weak) id<LFStreamSocketDelegate> delegate;
@@ -71,6 +83,7 @@ SAVC(mp4a);
 
 @property (nonatomic, assign) BOOL sendAudioHead;
 @property (nonatomic, assign) BOOL sendVideoHead;
+@property NSTimer *timer;
 
 @end
 
@@ -137,6 +150,7 @@ SAVC(mp4a);
 
 - (void)_stop
 {
+	[t invalidate];
     if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
         [self.delegate socketStatus:self status:LFLiveStateStop];
     }
@@ -233,7 +247,7 @@ SAVC(mp4a);
                 // 这里只为了不循环调用sendFrame方法 调用栈是保证先出栈再进栈
                 _self.isSending = NO;
             });
-            
+
         }
     });
 }
@@ -259,7 +273,12 @@ SAVC(mp4a);
     //设置URL
     if (PILI_RTMP_SetupURL(_rtmp, push_url, &_error) == FALSE) {
         //log(LOG_ERR, "RTMP_SetupURL() failed!");
-        goto Failed;
+		PILI_RTMP_Close(_rtmp, &_error);
+		PILI_RTMP_Free(_rtmp);
+		_rtmp = NULL;
+		[self reconnect];
+		return -1;
+//        goto Failed;
     }
 
     _rtmp->m_errorCallback = RTMPErrorCallback;
@@ -273,12 +292,22 @@ SAVC(mp4a);
 
     //连接服务器
     if (PILI_RTMP_Connect(_rtmp, NULL, &_error) == FALSE) {
-        goto Failed;
+		PILI_RTMP_Close(_rtmp, &_error);
+		PILI_RTMP_Free(_rtmp);
+		_rtmp = NULL;
+		[self reconnect];
+		return -1;
+      //  goto Failed;
     }
 
     //连接流
     if (PILI_RTMP_ConnectStream(_rtmp, 0, &_error) == FALSE) {
-        goto Failed;
+		PILI_RTMP_Close(_rtmp, &_error);
+		PILI_RTMP_Free(_rtmp);
+		_rtmp = NULL;
+		[self reconnect];
+		return -1;
+    //    goto Failed;
     }
 
 	self.reconnectionAttempts = 0;
@@ -287,8 +316,21 @@ SAVC(mp4a);
     }
 
     [self sendMetaData];
+	cnt = 0;
 
-    _isConnected = YES;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		NSDate *d = [NSDate dateWithTimeIntervalSinceNow: 3.0];
+		t = [[NSTimer alloc] initWithFireDate:d
+											  interval:1.0
+												target:self
+											  selector:@selector(sendExtra)
+											  userInfo:nil
+											   repeats:YES];
+		NSRunLoop *runner = [NSRunLoop currentRunLoop];
+		[runner addTimer:t forMode: NSDefaultRunLoopMode];
+	});
+
+	_isConnected = YES;
     _isConnecting = NO;
     _isReconnecting = NO;
     _isSending = NO;
@@ -355,6 +397,52 @@ Failed:
     if (!PILI_RTMP_SendPacket(_rtmp, &packet, FALSE, &_error)) {
         return;
     }
+}
+
+- (void)sendExtra
+{
+	cnt++;
+//	[self sendMetaData];
+	[self sendMetaData2];
+}
+
+- (void)sendMetaData2 {
+	NSLog(@"sending meta2");
+	PILI_RTMPPacket packet;
+
+	char pbuf[2048], *pend = pbuf + sizeof(pbuf);
+
+	packet.m_nChannel = 0x03;                   // control channel (invoke)
+	packet.m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+	packet.m_packetType = RTMP_PACKET_TYPE_INFO;
+	packet.m_nTimeStamp = latestTimestamp;
+	NSLog(@"timestamp: %d", latestTimestamp);
+	packet.m_nInfoField2 = _rtmp->m_stream_id;
+	packet.m_hasAbsTimestamp = TRUE;
+	packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
+
+	char *enc = packet.m_body;
+	enc = PILI_AMF_EncodeString(enc, pend, &av_setDataFrame);
+	enc = PILI_AMF_EncodeString(enc, pend, &av_onCaption);
+
+	*enc++ = PILI_AMF_OBJECT;
+
+	PILI_AVal a;
+	a.av_val = malloc(40);
+	sprintf(a.av_val, "sadf %d", cnt);
+//	NSLog(@"cnt: %d");
+	a.av_len = strlen(a.av_val);
+
+	enc = PILI_AMF_EncodeNamedString(enc, pend, &av_text, &a);
+
+	*enc++ = 0;
+	*enc++ = 0;
+	*enc++ = PILI_AMF_OBJECT_END;
+
+	packet.m_nBodySize = (uint32_t)(enc - packet.m_body);
+	if (!PILI_RTMP_SendPacket(_rtmp, &packet, FALSE, &_error)) {
+		return;
+	}
 }
 
 - (void)sendVideoHeader:(LFVideoFrame *)videoFrame {
@@ -425,6 +513,7 @@ Failed:
     memcpy(&body[i], frame.data.bytes, frame.data.length);
 
     [self sendPacket:RTMP_PACKET_TYPE_VIDEO data:body size:(rtmpLength) nTimestamp:frame.timestamp];
+	latestTimestamp = frame.timestamp;
     free(body);
 }
 
