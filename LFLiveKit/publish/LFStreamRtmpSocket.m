@@ -11,8 +11,8 @@
 //// https://github.com/mycujoo/mycujoobroadcast-android/blob/fc03d37edcdb26c167fcd94a5d54817913c76992/rtmpclient/src/main/jni/rtmp/libresrtmp.c
 /// use this to fix this file up?
 
-#if __has_include(<pili-librtmp/rtmp.h>)///
-#import <pili-librtmp/rtmp.h>///
+#if __has_include(<librtmp/rtmp.h>)///
+#import <librtmp/rtmp.h>///
 #else
 #import "rtmp.h"
 #endif

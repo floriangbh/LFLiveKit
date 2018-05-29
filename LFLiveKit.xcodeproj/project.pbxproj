@@ -242,7 +242,7 @@
 			isa = PBXGroup;
 			children = (
 				84358E861DD1FEB500811FC7 /* GPUImage */,
-				84358FE31DD1FEB600811FC7 /* pili-librtmp */,
+				84358FE31DD1FEB600811FC7 /* librtmp */,
 			);
 			path = Vendor;
 			sourceTree = "<group>";
@@ -318,7 +318,7 @@
 			path = Framework;
 			sourceTree = "<group>";
 		};
-		84358FE31DD1FEB600811FC7 /* pili-librtmp */ = {
+		84358FE31DD1FEB600811FC7 /* librtmp */ = {
 			isa = PBXGroup;
 			children = (
 				84358FE41DD1FEB600811FC7 /* amf.c */,
@@ -338,7 +338,8 @@
 				84358FF21DD1FEB600811FC7 /* rtmp.h */,
 				84358FF31DD1FEB600811FC7 /* rtmp_sys.h */,
 			);
-			path = "pili-librtmp";
+			name = librtmp;
+			path = "librtmp";
 			sourceTree = "<group>";
 		};
 		84D8B3861D7574D600752B56 = {
