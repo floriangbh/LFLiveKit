@@ -8,8 +8,11 @@
 
 #import "LFStreamRTMPSocket.h"
 
-#if __has_include(<pili-librtmp/rtmp.h>)
-#import <pili-librtmp/rtmp.h>
+//// https://github.com/mycujoo/mycujoobroadcast-android/blob/fc03d37edcdb26c167fcd94a5d54817913c76992/rtmpclient/src/main/jni/rtmp/libresrtmp.c
+/// use this to fix this file up?
+
+#if __has_include(<pili-librtmp/rtmp.h>)///
+#import <pili-librtmp/rtmp.h>///
 #else
 #import "rtmp.h"
 #endif
@@ -26,12 +29,12 @@ static const NSInteger ReconnectionIntervalSeconds = 3;
 #define RTMP_DATA_RESERVE_SIZE 400
 #define RTMP_HEAD_SIZE (sizeof(RTMPPacket) + RTMP_MAX_HEADER_SIZE)
 
-#define SAVC(x)    static const PILI_AVal av_ ## x = AVC(#x)
+#define SAVC(x)    static const AVal av_ ## x = AVC(#x)
 
-static const PILI_AVal av_setDataFrame = AVC("@setDataFrame");
-static const PILI_AVal av_SDKVersion = AVC("LFLiveKit 2.4.0");
-static const PILI_AVal av_TestCaption = AVC("Test Caption");
-static const PILI_AVal av_dat = AVC("dGVzdGluZ2dnZw==");
+static const AVal av_setDataFrame = AVC("@setDataFrame");
+static const AVal av_SDKVersion = AVC("LFLiveKit 2.4.0");
+static const AVal av_TestCaption = AVC("Test Caption");
+static const AVal av_dat = AVC("dGVzdGluZ2dnZw==");
 SAVC(onMetaData);
 SAVC(onCaption);
 SAVC(duration);
@@ -59,7 +62,7 @@ SAVC(avc1);
 SAVC(mp4a);
 
 @interface LFStreamRTMPSocket () <LFBufferDelegate> {
-    PILI_RTMP *_rtmp;
+    RTMP *_rtmp;
 	int cnt;
 	NSTimer *t;
 	uint16_t latestTimestamp;
@@ -71,7 +74,7 @@ SAVC(mp4a);
 @property (nonatomic, strong) LFLiveDebug *debugInfo;
 @property (nonatomic, strong) dispatch_queue_t rtmpSendQueue;
 
-@property (nonatomic, assign) RTMPError error;
+//@property (nonatomic, assign) RTMPError error;
 @property (nonatomic, assign) NSInteger reconnectionAttempts;
 @property (nonatomic, assign) NSInteger reconnectInterval;
 @property (nonatomic, assign) NSInteger reconnectCount;
@@ -134,8 +137,8 @@ SAVC(mp4a);
     }
     
     if (_rtmp != NULL) {
-        PILI_RTMP_Close(_rtmp, &_error);
-        PILI_RTMP_Free(_rtmp);
+        RTMP_Close(_rtmp);
+        RTMP_Free(_rtmp);
     }
     [self RTMP264_Connect:(char *)[_stream.url cStringUsingEncoding:NSASCIIStringEncoding]];
 }
@@ -155,8 +158,8 @@ SAVC(mp4a);
         [self.delegate socketStatus:self status:LFLiveStateStop];
     }
     if (_rtmp != NULL) {
-        PILI_RTMP_Close(_rtmp, &_error);
-        PILI_RTMP_Free(_rtmp);
+        RTMP_Close(_rtmp);
+        RTMP_Free(_rtmp);
         _rtmp = NULL;
     }
     [self clean];
@@ -267,43 +270,42 @@ SAVC(mp4a);
 - (NSInteger)RTMP264_Connect:(char *)push_url {
     //由于摄像头的timestamp是一直在累加，需要每次得到相对时间戳
     //分配与初始化
-    _rtmp = PILI_RTMP_Alloc();
-    PILI_RTMP_Init(_rtmp);
+    _rtmp = RTMP_Alloc();
+    RTMP_Init(_rtmp);
 
     //设置URL
-    if (PILI_RTMP_SetupURL(_rtmp, push_url, &_error) == FALSE) {
+    if (RTMP_SetupURL(_rtmp, push_url) == FALSE) {
         //log(LOG_ERR, "RTMP_SetupURL() failed!");
-		PILI_RTMP_Close(_rtmp, &_error);
-		PILI_RTMP_Free(_rtmp);
+		RTMP_Close(_rtmp);
+		RTMP_Free(_rtmp);
 		_rtmp = NULL;
 		[self reconnect];
 		return -1;
 //        goto Failed;
     }
 
-    _rtmp->m_errorCallback = RTMPErrorCallback;
-    _rtmp->m_connCallback = ConnectionTimeCallback;
-    _rtmp->m_userData = (__bridge void *)self;
+//    _rtmp->m_errorCallback = RTMPErrorCallback;
+//    _rtmp->m_userData = (__bridge void *)self;
     _rtmp->m_msgCounter = 1;
     _rtmp->Link.timeout = RTMP_RECEIVE_TIMEOUT;
     
     //设置可写，即发布流，这个函数必须在连接前使用，否则无效
-    PILI_RTMP_EnableWrite(_rtmp);
+    RTMP_EnableWrite(_rtmp);
 
     //连接服务器
-    if (PILI_RTMP_Connect(_rtmp, NULL, &_error) == FALSE) {
-		PILI_RTMP_Close(_rtmp, &_error);
-		PILI_RTMP_Free(_rtmp);
+    if (RTMP_Connect(_rtmp, NULL) == FALSE) {
+		RTMP_Close(_rtmp);
+		RTMP_Free(_rtmp);
 		_rtmp = NULL;
 		[self reconnect];
 		return -1;
       //  goto Failed;
-    }
+	}
 
     //连接流
-    if (PILI_RTMP_ConnectStream(_rtmp, 0, &_error) == FALSE) {
-		PILI_RTMP_Close(_rtmp, &_error);
-		PILI_RTMP_Free(_rtmp);
+    if (RTMP_ConnectStream(_rtmp, 0) == FALSE) {
+		RTMP_Close(_rtmp);
+		RTMP_Free(_rtmp);
 		_rtmp = NULL;
 		[self reconnect];
 		return -1;
@@ -337,8 +339,8 @@ SAVC(mp4a);
     return 0;
 
 Failed:
-    PILI_RTMP_Close(_rtmp, &_error);
-    PILI_RTMP_Free(_rtmp);
+    RTMP_Close(_rtmp);
+    RTMP_Free(_rtmp);
     _rtmp = NULL;
     [self reconnect];
     return -1;
@@ -347,7 +349,7 @@ Failed:
 #pragma mark -- Rtmp Send
 
 - (void)sendMetaData {
-    PILI_RTMPPacket packet;
+    RTMPPacket packet;
 
     char pbuf[2048], *pend = pbuf + sizeof(pbuf);
 
@@ -360,41 +362,41 @@ Failed:
     packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
 
     char *enc = packet.m_body;
-    enc = PILI_AMF_EncodeString(enc, pend, &av_setDataFrame);
-    enc = PILI_AMF_EncodeString(enc, pend, &av_onMetaData);
+    enc = AMF_EncodeString(enc, pend, &av_setDataFrame);
+    enc = AMF_EncodeString(enc, pend, &av_onMetaData);
 
-    *enc++ = PILI_AMF_OBJECT;
+    *enc++ = AMF_OBJECT;
 
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_duration, 0.0);
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_fileSize, 0.0);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_duration, 0.0);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_fileSize, 0.0);
 
     // videosize
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_width, _stream.videoConfiguration.videoSize.width);
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_height, _stream.videoConfiguration.videoSize.height);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_width, _stream.videoConfiguration.videoSize.width);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_height, _stream.videoConfiguration.videoSize.height);
 
     // video
-    enc = PILI_AMF_EncodeNamedString(enc, pend, &av_videocodecid, &av_avc1);
+    enc = AMF_EncodeNamedString(enc, pend, &av_videocodecid, &av_avc1);
 
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_videodatarate, _stream.videoConfiguration.videoBitrate / 1000.f);
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_framerate, _stream.videoConfiguration.videoFrameRate);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_videodatarate, _stream.videoConfiguration.videoBitrate / 1000.f);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_framerate, _stream.videoConfiguration.videoFrameRate);
 
     // audio
-    enc = PILI_AMF_EncodeNamedString(enc, pend, &av_audiocodecid, &av_mp4a);
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_audiodatarate, _stream.audioConfiguration.audioBitrate);
+    enc = AMF_EncodeNamedString(enc, pend, &av_audiocodecid, &av_mp4a);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_audiodatarate, _stream.audioConfiguration.audioBitrate);
 
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_audiosamplerate, _stream.audioConfiguration.audioSampleRate);
-    enc = PILI_AMF_EncodeNamedNumber(enc, pend, &av_audiosamplesize, 16.0);
-    enc = PILI_AMF_EncodeNamedBoolean(enc, pend, &av_stereo, _stream.audioConfiguration.numberOfChannels == 2);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_audiosamplerate, _stream.audioConfiguration.audioSampleRate);
+    enc = AMF_EncodeNamedNumber(enc, pend, &av_audiosamplesize, 16.0);
+    enc = AMF_EncodeNamedBoolean(enc, pend, &av_stereo, _stream.audioConfiguration.numberOfChannels == 2);
 
     // sdk version
-    enc = PILI_AMF_EncodeNamedString(enc, pend, &av_encoder, &av_SDKVersion);
+    enc = AMF_EncodeNamedString(enc, pend, &av_encoder, &av_SDKVersion);
 
     *enc++ = 0;
     *enc++ = 0;
-    *enc++ = PILI_AMF_OBJECT_END;
+    *enc++ = AMF_OBJECT_END;
 
     packet.m_nBodySize = (uint32_t)(enc - packet.m_body);
-    if (!PILI_RTMP_SendPacket(_rtmp, &packet, FALSE, &_error)) {
+    if (!RTMP_SendPacket(_rtmp, &packet, FALSE)) {
         return;
     }
 }
@@ -408,7 +410,7 @@ Failed:
 
 - (void)sendMetaData2 {
 	NSLog(@"sending meta2");
-	PILI_RTMPPacket packet;
+	RTMPPacket packet;
 
 	char pbuf[2048], *pend = pbuf + sizeof(pbuf);
 
@@ -422,25 +424,25 @@ Failed:
 	packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
 
 	char *enc = packet.m_body;
-	enc = PILI_AMF_EncodeString(enc, pend, &av_setDataFrame);
-	enc = PILI_AMF_EncodeString(enc, pend, &av_onCaption);
+	enc = AMF_EncodeString(enc, pend, &av_setDataFrame);
+	enc = AMF_EncodeString(enc, pend, &av_onCaption);
 
-	*enc++ = PILI_AMF_OBJECT;
+	*enc++ = AMF_OBJECT;
 
-	PILI_AVal a;
+	AVal a;
 	a.av_val = malloc(40);
 	sprintf(a.av_val, "sadf %d", cnt);
 //	NSLog(@"cnt: %d");
 	a.av_len = strlen(a.av_val);
 
-	enc = PILI_AMF_EncodeNamedString(enc, pend, &av_text, &a);
+	enc = AMF_EncodeNamedString(enc, pend, &av_text, &a);
 
 	*enc++ = 0;
 	*enc++ = 0;
-	*enc++ = PILI_AMF_OBJECT_END;
+	*enc++ = AMF_OBJECT_END;
 
 	packet.m_nBodySize = (uint32_t)(enc - packet.m_body);
-	if (!PILI_RTMP_SendPacket(_rtmp, &packet, FALSE, &_error)) {
+	if (!RTMP_SendPacket(_rtmp, &packet, FALSE)) {
 		return;
 	}
 }
@@ -520,9 +522,9 @@ Failed:
 - (NSInteger)sendPacket:(unsigned int)nPacketType data:(unsigned char *)data size:(NSInteger)size nTimestamp:(uint64_t)nTimestamp
 {
     NSInteger rtmpLength = size;
-    PILI_RTMPPacket rtmp_pack;
-    PILI_RTMPPacket_Reset(&rtmp_pack);
-    PILI_RTMPPacket_Alloc(&rtmp_pack, (uint32_t)rtmpLength);
+    RTMPPacket rtmp_pack;
+    RTMPPacket_Reset(&rtmp_pack);
+    RTMPPacket_Alloc(&rtmp_pack, (uint32_t)rtmpLength);
 
     rtmp_pack.m_nBodySize = (uint32_t)size;
     memcpy(rtmp_pack.m_body, data, size);
@@ -538,14 +540,14 @@ Failed:
 
     NSInteger nRet = [self RtmpPacketSend:&rtmp_pack];
 
-    PILI_RTMPPacket_Free(&rtmp_pack);
+    RTMPPacket_Free(&rtmp_pack);
     return nRet;
 }
 
-- (NSInteger)RtmpPacketSend:(PILI_RTMPPacket *)packet
+- (NSInteger)RtmpPacketSend:(RTMPPacket *)packet
 {
-    if (_rtmp && PILI_RTMP_IsConnected(_rtmp)) {
-        int success = PILI_RTMP_SendPacket(_rtmp, packet, 0, &_error);
+    if (_rtmp && RTMP_IsConnected(_rtmp)) {
+        int success = RTMP_SendPacket(_rtmp, packet, 0);
         return success;
     }
     return -1;
@@ -614,8 +616,8 @@ Failed:
     _isReconnecting = NO;
     if (_isConnected) return;
     if (_rtmp != NULL) {
-        PILI_RTMP_Close(_rtmp, &_error);
-        PILI_RTMP_Free(_rtmp);
+        RTMP_Close(_rtmp);
+        RTMP_Free(_rtmp);
         _rtmp = NULL;
     }
     _sendAudioHead = NO;
@@ -626,24 +628,20 @@ Failed:
     }
     
     if (_rtmp != NULL) {
-        PILI_RTMP_Close(_rtmp, &_error);
-        PILI_RTMP_Free(_rtmp);
+        RTMP_Close(_rtmp);
+        RTMP_Free(_rtmp);
     }
     [self RTMP264_Connect:(char *)[_stream.url cStringUsingEncoding:NSASCIIStringEncoding]];
 }
 
-#pragma mark -- CallBack
-void RTMPErrorCallback(RTMPError *error, void *userData)
-{
-    LFStreamRTMPSocket *socket = (__bridge LFStreamRTMPSocket *)userData;
-    if (error->code < 0) {
-        [socket reconnect];
-    }
-}
-
-void ConnectionTimeCallback(PILI_CONNECTION_TIME *conn_time, void *userData)
-{
-}
+//#pragma mark -- CallBack
+//void RTMPErrorCallback(RTMPError *error, void *userData)
+//{
+//    LFStreamRTMPSocket *socket = (__bridge LFStreamRTMPSocket *)userData;
+//    if (error->code < 0) {
+//        [socket reconnect];
+//    }
+//}
 
 #pragma mark -- LFBufferDelegate
 - (void)streamingBuffer:(nullable LFBuffer *)buffer bufferState:(LFBufferState)state
