@@ -8,13 +8,9 @@
 
 #import "LFStreamSocket.h"
 
-@interface LFStreamRTMPSocket : NSObject<LFStreamSocket>
+@interface LFStreamRTMPSocket : NSObject <LFStreamSocket>
 
-#pragma mark - Initializer
-///=============================================================================
-/// @name Initializer
-///=============================================================================
-- (nullable instancetype)init UNAVAILABLE_ATTRIBUTE;
-+ (nullable instancetype)new UNAVAILABLE_ATTRIBUTE;
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
++ (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
 @end

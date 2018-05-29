@@ -7,25 +7,29 @@
 //
 
 #import "LFAudioCapture.h"
+
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
+
 NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentFailedToCreateNotification";
+
 
 @interface LFAudioCapture ()
 
-@property (nonatomic, assign) AudioComponentInstance componetInstance;
+@property (nonatomic, assign) AudioComponentInstance componentInstance;
 @property (nonatomic, assign) AudioComponent component;
 @property (nonatomic, strong) dispatch_queue_t taskQueue;
 @property (nonatomic, assign) BOOL isRunning;
-@property (nonatomic, strong,nullable) LFLiveAudioConfiguration *configuration;
+@property (nonatomic, strong,nullable) LFAudioConfiguration *configuration;
 
 @end
+
 
 @implementation LFAudioCapture
 
 #pragma mark -- LiftCycle
-- (instancetype)initWithAudioConfiguration:(LFLiveAudioConfiguration *)configuration{
+- (instancetype)initWithAudioConfiguration:(LFAudioConfiguration *)configuration {
     if(self = [super init]){
         _configuration = configuration;
         self.isRunning = NO;
@@ -54,7 +58,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         self.component = AudioComponentFindNext(NULL, &acd);
         
         OSStatus status = noErr;
-        status = AudioComponentInstanceNew(self.component, &_componetInstance);
+        status = AudioComponentInstanceNew(self.component, &_componentInstance);
         
         if (noErr != status) {
             [self handleAudioComponentCreationFailure];
@@ -62,7 +66,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         
         UInt32 flagOne = 1;
         
-        AudioUnitSetProperty(self.componetInstance, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &flagOne, sizeof(flagOne));
+        AudioUnitSetProperty(self.componentInstance, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &flagOne, sizeof(flagOne));
         
         AudioStreamBasicDescription desc = {0};
         desc.mSampleRate = _configuration.audioSampleRate;
@@ -77,10 +81,10 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         AURenderCallbackStruct cb;
         cb.inputProcRefCon = (__bridge void *)(self);
         cb.inputProc = handleInputBuffer;
-        AudioUnitSetProperty(self.componetInstance, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &desc, sizeof(desc));
-        AudioUnitSetProperty(self.componetInstance, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 1, &cb, sizeof(cb));
+        AudioUnitSetProperty(self.componentInstance, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &desc, sizeof(desc));
+        AudioUnitSetProperty(self.componentInstance, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 1, &cb, sizeof(cb));
         
-        status = AudioUnitInitialize(self.componetInstance);
+        status = AudioUnitInitialize(self.componentInstance);
         
         if (noErr != status) {
             [self handleAudioComponentCreationFailure];
@@ -88,6 +92,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         
         [session setPreferredSampleRate:_configuration.audioSampleRate error:nil];
         [session setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers error:nil];
+		[session setMode:AVAudioSessionModeVideoRecording error:nil];
         [session setActive:YES withOptions:kAudioSessionSetActiveFlag_NotifyOthersOnDeactivation error:nil];
         
         [session setActive:YES error:nil];
@@ -99,11 +104,11 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     dispatch_sync(self.taskQueue, ^{
-        if (self.componetInstance) {
+        if (self.componentInstance) {
             self.isRunning = NO;
-            AudioOutputUnitStop(self.componetInstance);
-            AudioComponentInstanceDispose(self.componetInstance);
-            self.componetInstance = nil;
+            AudioOutputUnitStop(self.componentInstance);
+            AudioComponentInstanceDispose(self.componentInstance);
+            self.componentInstance = nil;
             self.component = nil;
         }
     });
@@ -118,13 +123,13 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
             self.isRunning = YES;
             NSLog(@"MicrophoneSource: startRunning");
             [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers error:nil];
-            AudioOutputUnitStart(self.componetInstance);
+            AudioOutputUnitStart(self.componentInstance);
         });
     } else {
         dispatch_sync(self.taskQueue, ^{
             self.isRunning = NO;
             NSLog(@"MicrophoneSource: stopRunning");
-            AudioOutputUnitStop(self.componetInstance);
+            AudioOutputUnitStop(self.componentInstance);
         });
     }
 }
@@ -174,7 +179,8 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
     }
 }
 
-- (void)handleInterruption:(NSNotification *)notification {
+- (void)handleInterruption:(NSNotification *)notification
+{
     NSInteger reason = 0;
     NSString *reasonStr = @"";
     if ([notification.name isEqualToString:AVAudioSessionInterruptionNotification]) {
@@ -184,7 +190,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
             if (self.isRunning) {
                 dispatch_sync(self.taskQueue, ^{
                     NSLog(@"MicrophoneSource: stopRunning");
-                    AudioOutputUnitStop(self.componetInstance);
+                    AudioOutputUnitStop(self.componentInstance);
                 });
             }
         }
@@ -197,7 +203,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
                 if (self.isRunning) {
                     dispatch_async(self.taskQueue, ^{
                         NSLog(@"MicrophoneSource: startRunning");
-                        AudioOutputUnitStart(self.componetInstance);
+                        AudioOutputUnitStart(self.componentInstance);
                     });
                 }
                 // Indicates that the audio session is active and immediately ready to be used. Your app can resume the audio operation that was interrupted.
@@ -232,7 +238,7 @@ static OSStatus handleInputBuffer(void *inRefCon,
         buffers.mNumberBuffers = 1;
         buffers.mBuffers[0] = buffer;
 
-        OSStatus status = AudioUnitRender(source.componetInstance,
+        OSStatus status = AudioUnitRender(source.componentInstance,
                                           ioActionFlags,
                                           inTimeStamp,
                                           inBusNumber,

@@ -7,24 +7,33 @@
 //
 
 #import <Foundation/Foundation.h>
+
 #import "LFVideoFrame.h"
-#import "LFLiveVideoConfiguration.h"
+#import "LFVideoConfiguration.h"
+
 
 @protocol LFVideoEncoding;
-/// 编码器编码后回调
+
+
+// get frame back after encoding
 @protocol LFVideoEncodingDelegate <NSObject>
+
 @required
 - (void)videoEncoder:(nullable id<LFVideoEncoding>)encoder videoFrame:(nullable LFVideoFrame *)frame;
+
 @end
 
-/// 编码器抽象的接口
+
+// encoder interface
 @protocol LFVideoEncoding <NSObject>
+
 @required
 - (void)encodeVideoData:(nullable CVPixelBufferRef)pixelBuffer timeStamp:(uint64_t)timeStamp;
+
 @optional
-@property (nonatomic, assign) NSInteger videoBitRate;
-- (nullable instancetype)initWithVideoStreamConfiguration:(nullable LFLiveVideoConfiguration *)configuration;
+@property (nonatomic, assign) NSInteger videoBitrate;
+- (nullable instancetype)initWithVideoStreamConfiguration:(nullable LFVideoConfiguration *)configuration;
 - (void)setDelegate:(nullable id<LFVideoEncodingDelegate>)delegate;
 - (void)stopEncoder;
-@end
 
+@end
