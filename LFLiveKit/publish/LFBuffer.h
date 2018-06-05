@@ -32,7 +32,7 @@ typedef NS_ENUM (NSUInteger, LFBufferState) {
 
 @interface LFBuffer : NSObject
 
-@property (nullable, nonatomic, weak) id <LFBufferDelegate> delegate;
+@property (nullable, nonatomic, weak) id<LFBufferDelegate> delegate;
 
 // current frame buffer
 @property (nonatomic, strong, readonly) NSMutableArray <LFFrame *> *_Nonnull list;

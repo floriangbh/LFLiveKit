@@ -77,6 +77,7 @@ typedef NS_OPTIONS(NSInteger, LFCaptureTypeMask) {
 
 - (void)focusAtPoint:(CGPoint)point;
 - (void)autofocus;
+- (void)sendSubtitle:(NSString *)text;
 
 /** The torch control capture flash is on or off */
 @property (nonatomic, assign) BOOL torch;
