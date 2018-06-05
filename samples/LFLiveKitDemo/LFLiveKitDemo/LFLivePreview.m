@@ -32,6 +32,7 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 
 @interface LFLivePreview ()<LFLiveSessionDelegate>
 
+@property (nonatomic, strong) UIButton *subtitleButton;
 @property (nonatomic, strong) UIButton *cameraButton;
 @property (nonatomic, strong) UIButton *closeButton;
 @property (nonatomic, strong) UIButton *startLiveButton;
@@ -53,6 +54,7 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
         [self.containerView addSubview:self.stateLabel];
         [self.containerView addSubview:self.closeButton];
         [self.containerView addSubview:self.cameraButton];
+		[self.containerView addSubview:self.subtitleButton];
         [self.containerView addSubview:self.startLiveButton];
     }
     return self;
@@ -340,6 +342,21 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     return _cameraButton;
 }
 
+- (UIButton *)subtitleButton {
+	if (!_subtitleButton) {
+		_subtitleButton = [UIButton new];
+		_subtitleButton.size = CGSizeMake(44, 44);
+		_subtitleButton.origin = CGPointMake(_cameraButton.left - 10 - _subtitleButton.width, 20);
+		[_subtitleButton setImage:[UIImage imageNamed:@"camra_beauty"] forState:UIControlStateNormal];
+		_subtitleButton.exclusiveTouch = YES;
+		__weak typeof(self) _self = self;
+		[_subtitleButton addBlockForControlEvents:UIControlEventTouchUpInside block:^(id sender) {
+			[_self.session sendSubtitle:@"bla"];
+		}];
+	}
+	return _subtitleButton;
+}
+
 - (UIButton *)startLiveButton {
     if (!_startLiveButton) {
         _startLiveButton = [UIButton new];
@@ -358,8 +375,9 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
             if (_self.startLiveButton.selected) {
                 [_self.startLiveButton setTitle:@"stop" forState:UIControlStateNormal];
                 LFStreamInfo *stream = [LFStreamInfo new];
-                stream.url = @"rtmp://192.168.4.26:1935/live/te";
+//				stream.url = @"rtmp://192.168.4.26:1935/live/te";
 //				stream.url = @"rtmp://stream-staging-eu.mycujoo.tv/live/18b98ecedc10411a8fe392629949aaed";
+				stream.url = @"rtmp://stream.mycujoo.tv/live/6e672ca99aa84c009d8031e94d7867f6";
                 [_self.session startLive:stream];
 							_self.session.saveLocalVideo = YES;
 							NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;

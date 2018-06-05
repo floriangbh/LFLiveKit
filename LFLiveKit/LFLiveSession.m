@@ -15,7 +15,7 @@
 #import "LFStreamRTMPSocket.h"
 
 
-@interface LFLiveSession () <LFAudioCaptureDelegate, LFVideoCaptureDelegate, LFAudioEncodingDelegate, LFVideoEncodingDelegate, LFStreamSocketDelegate>
+@interface LFLiveSession () <LFAudioCaptureDelegate, LFVideoCaptureDelegate, LFAudioEncodingDelegate, LFVideoEncodingDelegate, LFStreamRTMPSocketDelegate>
 
 /// 音频配置
 @property (nonatomic, strong) LFAudioConfiguration *audioConfiguration;
@@ -30,7 +30,7 @@
 /// 视频编码
 @property (nonatomic, strong) id<LFVideoEncoding> videoEncoder;
 /// 上传
-@property (nonatomic, strong) id<LFStreamSocket> socket;
+@property (nonatomic, strong) LFStreamRTMPSocket *socket;
 
 
 #pragma mark -- 内部标识
@@ -165,7 +165,7 @@
 }
 
 #pragma mark -- LFStreamTcpSocketDelegate
-- (void)socketStatus:(nullable id<LFStreamSocket>)socket status:(LFLiveState)status {
+- (void)socketStatus:(nullable LFStreamRTMPSocket *)socket status:(LFLiveState)status {
     if (status == LFLiveStateStart) {
         if (!self.uploading) {
             self.AVAlignment = NO;
@@ -185,7 +185,7 @@
     });
 }
 
-- (void)socketDidError:(nullable id<LFStreamSocket>)socket error:(LFLiveSocketError)error {
+- (void)socketDidError:(nullable LFStreamRTMPSocket *)socket error:(LFLiveSocketError)error {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.delegate && [self.delegate respondsToSelector:@selector(liveSession:socketError:)]) {
             [self.delegate liveSession:self socketError:error];
@@ -193,7 +193,7 @@
     });
 }
 
-- (void)socketDebug:(nullable id<LFStreamSocket>)socket debugInfo:(nullable LFLiveDebug *)debugInfo {
+- (void)socketDebug:(nullable LFStreamRTMPSocket *)socket debugInfo:(nullable LFLiveDebug *)debugInfo {
     self.debugInfo = debugInfo;
     if (self.showDebugInfo) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -204,7 +204,7 @@
     }
 }
 
-- (void)socketBufferStatus:(nullable id<LFStreamSocket>)socket status:(LFBufferState)status
+- (void)socketBufferStatus:(nullable LFStreamRTMPSocket *)socket status:(LFBufferState)status
 {
     if (self.captureType & LFCaptureMaskVideo && self.adaptiveBitrate) {
         NSUInteger videoBitrate = [self.videoEncoder videoBitrate];
@@ -342,6 +342,11 @@
 	[self.videoCaptureSource autofocus];
 }
 
+- (void)sendSubtitle:(NSString *)text
+{
+	[self.socket sendSubtitle:text];
+}
+
 - (void)setTorch:(BOOL)torch
 {
     [self.videoCaptureSource setTorch:torch];
@@ -417,7 +422,7 @@
     return _videoEncoder;
 }
 
-- (id<LFStreamSocket>)socket
+- (LFStreamRTMPSocket *)socket
 {
     if (!_socket) {
         _socket = [[LFStreamRTMPSocket alloc] initWithStream:self.streamInfo reconnectInterval:self.reconnectInterval reconnectCount:self.reconnectCount];

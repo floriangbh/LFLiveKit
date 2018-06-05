@@ -9,7 +9,7 @@
 @property (strong) NSMutableArray *filters;
 
 @property (strong) GPUImageOutput *input;
-@property (strong) id <GPUImageInput> output;
+@property (strong) id<GPUImageInput> output;
 
 - (id) initWithOrderedFilters:(NSArray*) filters input:(GPUImageOutput*)input output:(id <GPUImageInput>)output;
 - (id) initWithConfiguration:(NSDictionary*) configuration input:(GPUImageOutput*)input output:(id <GPUImageInput>)output;

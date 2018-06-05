@@ -68,7 +68,7 @@ SAVC(mp4a);
 	uint16_t latestTimestamp;
 }
 
-@property (nonatomic, weak) id<LFStreamSocketDelegate> delegate;
+@property (nonatomic, weak) id<LFStreamRTMPSocketDelegate> delegate;
 @property (nonatomic, strong) LFStreamInfo *stream;
 @property (nonatomic, strong) LFBuffer *buffer;
 @property (nonatomic, strong) LFLiveDebug *debugInfo;
@@ -93,7 +93,6 @@ SAVC(mp4a);
 
 @implementation LFStreamRTMPSocket
 
-#pragma mark -- LFStreamSocket
 - (nullable instancetype)initWithStream:(nullable LFStreamInfo *)stream {
     return [self initWithStream:stream reconnectInterval:0 reconnectCount:0];
 }
@@ -174,7 +173,7 @@ SAVC(mp4a);
     }
 }
 
-- (void)setDelegate:(id<LFStreamSocketDelegate>)delegate {
+- (void)setDelegate:(id<LFStreamRTMPSocketDelegate>)delegate {
     _delegate = delegate;
 }
 
@@ -255,6 +254,46 @@ SAVC(mp4a);
     });
 }
 
+- (void)sendSubtitle:(NSString *)text
+{
+	NSLog(@"sending subtitle: %@", text);
+	RTMPPacket packet;
+
+	char pbuf[2048], *pend = pbuf + sizeof(pbuf);
+
+	packet.m_nChannel = 0x03;                   // control channel (invoke)
+	packet.m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+	packet.m_packetType = RTMP_PACKET_TYPE_INFO;
+	packet.m_nTimeStamp = latestTimestamp;
+//	NSLog(@"timestamp: %d", latestTimestamp);
+	packet.m_nInfoField2 = _rtmp->m_stream_id;
+	packet.m_hasAbsTimestamp = TRUE;
+	packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
+
+	char *enc = packet.m_body;
+	enc = AMF_EncodeString(enc, pend, &av_setDataFrame);
+	enc = AMF_EncodeString(enc, pend, &av_onCaption);
+
+	*enc++ = AMF_OBJECT;
+
+	AVal ctext;
+	ctext.av_val = strdup(text.UTF8String);
+	sprintf(ctext.av_val, "sadf %d", cnt);
+	//	NSLog(@"cnt: %d");
+	ctext.av_len = strlen(ctext.av_val);
+
+	enc = AMF_EncodeNamedString(enc, pend, &av_text, &ctext);
+
+	*enc++ = 0;
+	*enc++ = 0;
+	*enc++ = AMF_OBJECT_END;
+
+	packet.m_nBodySize = (uint32_t)(enc - packet.m_body);
+	if (!RTMP_SendPacket(_rtmp, &packet, FALSE)) {
+		return;
+	}
+}
+
 - (void)clean {
     _isConnecting = NO;
     _isReconnecting = NO;
@@ -318,19 +357,21 @@ SAVC(mp4a);
     }
 
     [self sendMetaData];
-	cnt = 0;
 
-	dispatch_sync(dispatch_get_main_queue(), ^{
-		NSDate *d = [NSDate dateWithTimeIntervalSinceNow: 3.0];
-		t = [[NSTimer alloc] initWithFireDate:d
-											  interval:1.0
-												target:self
-											  selector:@selector(sendExtra)
-											  userInfo:nil
-											   repeats:YES];
-		NSRunLoop *runner = [NSRunLoop currentRunLoop];
-		[runner addTimer:t forMode: NSDefaultRunLoopMode];
-	});
+
+	// subtitle test
+//	cnt = 0;
+//	dispatch_sync(dispatch_get_main_queue(), ^{
+//		NSDate *d = [NSDate dateWithTimeIntervalSinceNow: 3.0];
+//		t = [[NSTimer alloc] initWithFireDate:d
+//											  interval:1.0
+//												target:self
+//											  selector:@selector(sendExtra)
+//											  userInfo:nil
+//											   repeats:YES];
+//		NSRunLoop *runner = [NSRunLoop currentRunLoop];
+//		[runner addTimer:t forMode: NSDefaultRunLoopMode];
+//	});
 
 	_isConnected = YES;
     _isConnecting = NO;
