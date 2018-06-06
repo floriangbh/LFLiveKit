@@ -13,7 +13,6 @@
 		84D8B4341D75778B00752B56 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84D8B4321D75778B00752B56 /* Main.storyboard */; };
 		84D8B4361D75778B00752B56 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84D8B4351D75778B00752B56 /* Assets.xcassets */; };
 		84D8B4391D75778B00752B56 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84D8B4371D75778B00752B56 /* LaunchScreen.storyboard */; };
-		84D8B44B1D75781200752B56 /* LFLivePreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 84D8B44A1D75781200752B56 /* LFLivePreview.m */; };
 		84D8B45B1D75782700752B56 /* UIControl+YYAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = 84D8B44E1D75782700752B56 /* UIControl+YYAdd.m */; };
 		84D8B45C1D75782700752B56 /* UIView+YYAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = 84D8B4501D75782700752B56 /* UIView+YYAdd.m */; };
 		84D8B45D1D75782700752B56 /* camra_beauty@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 84D8B4521D75782700752B56 /* camra_beauty@2x.png */; };
@@ -28,6 +27,7 @@
 		84D8B4CF1D757F0700752B56 /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D8B4CE1D757F0700752B56 /* libstdc++.tbd */; };
 		AF7CB3641F5DA86C001DA054 /* LFLiveKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF7AED631F5DA56F0069B519 /* LFLiveKit.framework */; };
 		AF7CB3651F5DA86C001DA054 /* LFLiveKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AF7AED631F5DA56F0069B519 /* LFLiveKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		AFA76DAA20C7C2BB0001E465 /* StreamView.m in Sources */ = {isa = PBXBuildFile; fileRef = AFA76DA920C7C2BB0001E465 /* StreamView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,8 +72,6 @@
 		84D8B4351D75778B00752B56 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		84D8B4381D75778B00752B56 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84D8B43A1D75778B00752B56 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		84D8B4491D75781200752B56 /* LFLivePreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFLivePreview.h; sourceTree = "<group>"; };
-		84D8B44A1D75781200752B56 /* LFLivePreview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFLivePreview.m; sourceTree = "<group>"; };
 		84D8B44D1D75782700752B56 /* UIControl+YYAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIControl+YYAdd.h"; sourceTree = "<group>"; };
 		84D8B44E1D75782700752B56 /* UIControl+YYAdd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIControl+YYAdd.m"; sourceTree = "<group>"; };
 		84D8B44F1D75782700752B56 /* UIView+YYAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+YYAdd.h"; sourceTree = "<group>"; };
@@ -89,6 +87,8 @@
 		84D8B45A1D75782700752B56 /* ios-29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ios-29x29.png"; sourceTree = "<group>"; };
 		84D8B4CE1D757F0700752B56 /* libstdc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
 		AF7AED5E1F5DA56F0069B519 /* LFLiveKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LFLiveKit.xcodeproj; path = ../../../LFLiveKit.xcodeproj; sourceTree = "<group>"; };
+		AFA76DA820C7C2BB0001E465 /* StreamView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StreamView.h; sourceTree = "<group>"; };
+		AFA76DA920C7C2BB0001E465 /* StreamView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StreamView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,8 +128,8 @@
 				84D8B42D1D75778B00752B56 /* AppDelegate.m */,
 				84D8B42F1D75778B00752B56 /* ViewController.h */,
 				84D8B4301D75778B00752B56 /* ViewController.m */,
-				84D8B4491D75781200752B56 /* LFLivePreview.h */,
-				84D8B44A1D75781200752B56 /* LFLivePreview.m */,
+				AFA76DA820C7C2BB0001E465 /* StreamView.h */,
+				AFA76DA920C7C2BB0001E465 /* StreamView.m */,
 				84D8B44C1D75782700752B56 /* category */,
 				84D8B4511D75782700752B56 /* images */,
 				84D8B4321D75778B00752B56 /* Main.storyboard */,
@@ -286,8 +286,8 @@
 				84D8B45B1D75782700752B56 /* UIControl+YYAdd.m in Sources */,
 				84D8B4311D75778B00752B56 /* ViewController.m in Sources */,
 				84D8B45C1D75782700752B56 /* UIView+YYAdd.m in Sources */,
+				AFA76DAA20C7C2BB0001E465 /* StreamView.m in Sources */,
 				84D8B42E1D75778B00752B56 /* AppDelegate.m in Sources */,
-				84D8B44B1D75781200752B56 /* LFLivePreview.m in Sources */,
 				84D8B42B1D75778B00752B56 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
