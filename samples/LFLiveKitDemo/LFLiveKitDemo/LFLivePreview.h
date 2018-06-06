@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface LFLivePreview : UIView
 
+@interface LFLivePreview : UIView
 @end

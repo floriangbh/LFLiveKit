@@ -11,6 +11,7 @@
 #import "UIView+YYAdd.h"
 #import <LFLiveKit/LFLiveKit.h>
 
+
 inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     if (elapsed_milli <= 0) {
         return @"N/A";
@@ -30,6 +31,7 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     }
 }
 
+
 @interface LFLivePreview ()<LFLiveSessionDelegate>
 
 @property (nonatomic, strong) UIButton *subtitleButton;
@@ -43,9 +45,11 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 
 @end
 
+
 @implementation LFLivePreview
 
-- (instancetype)initWithFrame:(CGRect)frame {
+- (instancetype)initWithFrame:(CGRect)frame
+{
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = [UIColor clearColor];
         [self requestAccessForVideo];
@@ -56,12 +60,13 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
         [self.containerView addSubview:self.cameraButton];
 		[self.containerView addSubview:self.subtitleButton];
         [self.containerView addSubview:self.startLiveButton];
-    }
+	}
     return self;
 }
 
 #pragma mark -- Public Method
-- (void)requestAccessForVideo {
+- (void)requestAccessForVideo
+{
     __weak typeof(self) _self = self;
     AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
     switch (status) {
@@ -93,7 +98,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     }
 }
 
-- (void)requestAccessForAudio {
+- (void)requestAccessForAudio
+{
     AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
     switch (status) {
     case AVAuthorizationStatusNotDetermined: {
@@ -114,7 +120,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 
 #pragma mark -- LFStreamingSessionDelegate
 /** live status changed will callback */
-- (void)liveSession:(nullable LFLiveSession *)session liveStateDidChange:(LFLiveState)state {
+- (void)liveSession:(nullable LFLiveSession *)session liveStateDidChange:(LFLiveState)state
+{
     NSLog(@"liveStateDidChange: %ld", state);
     switch (state) {
     case LFLiveStateReady:
@@ -138,17 +145,20 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 }
 
 /** live debug info callback */
-- (void)liveSession:(nullable LFLiveSession *)session debugInfo:(nullable LFLiveDebug *)debugInfo {
+- (void)liveSession:(nullable LFLiveSession *)session debugInfo:(nullable LFLiveDebug *)debugInfo
+{
 	NSLog(@"debugInfo uploadSpeed: %@", formatedSpeed(debugInfo.currentBandwidth, debugInfo.elapsedMilli));
 }
 
 /** callback socket errorcode */
-- (void)liveSession:(nullable LFLiveSession *)session socketError:(LFLiveSocketError)socketError {
+- (void)liveSession:(nullable LFLiveSession *)session socketError:(LFLiveSocketError)socketError
+{
 	NSLog(@"socketError: %ld", socketError);
 }
 
 #pragma mark -- Getter Setter
-- (LFLiveSession *)session {
+- (LFLiveSession *)session
+{
 	if (_session) return _session;
 
 	/*
@@ -273,7 +283,7 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
         _session.delegate = self;
         _session.showDebugInfo = YES;
         _session.previewView = self;
-        
+
         /*本地存储*/
 //        _session.saveLocalVideo = YES;
 //        NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
@@ -281,17 +291,12 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 //        NSURL *movieURL = [NSURL fileURLWithPath:pathToMovie];
 //        _session.saveLocalVideoPath = movieURL;
         
-        /*
-        UIImageView *imageView = [[UIImageView alloc] init];
-        imageView.alpha = 0.8;
-        imageView.frame = CGRectMake(100, 100, 29, 29);
-        imageView.image = [UIImage imageNamed:@"ios-29x29"];
-        _session.warterMarkView = imageView;*/
 
 	return _session;
 }
 
-- (UIView *)containerView {
+- (UIView *)containerView
+{
     if (!_containerView) {
         _containerView = [UIView new];
         _containerView.frame = self.bounds;
@@ -301,7 +306,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     return _containerView;
 }
 
-- (UILabel *)stateLabel {
+- (UILabel *)stateLabel
+{
     if (!_stateLabel) {
         _stateLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 80, 40)];
         _stateLabel.text = @"state";
@@ -311,7 +317,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     return _stateLabel;
 }
 
-- (UIButton *)closeButton {
+- (UIButton *)closeButton
+{
     if (!_closeButton) {
         _closeButton = [UIButton new];
         _closeButton.size = CGSizeMake(44, 44);
@@ -326,7 +333,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     return _closeButton;
 }
 
-- (UIButton *)cameraButton {
+- (UIButton *)cameraButton
+{
     if (!_cameraButton) {
         _cameraButton = [UIButton new];
         _cameraButton.size = CGSizeMake(44, 44);
@@ -342,7 +350,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
     return _cameraButton;
 }
 
-- (UIButton *)subtitleButton {
+- (UIButton *)subtitleButton
+{
 	if (!_subtitleButton) {
 		_subtitleButton = [UIButton new];
 		_subtitleButton.size = CGSizeMake(44, 44);
@@ -357,7 +366,8 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 	return _subtitleButton;
 }
 
-- (UIButton *)startLiveButton {
+- (UIButton *)startLiveButton
+{
     if (!_startLiveButton) {
         _startLiveButton = [UIButton new];
         _startLiveButton.size = CGSizeMake(self.width - 60, 44);
@@ -399,4 +409,3 @@ inline static NSString *formatedSpeed(float bytes, float elapsed_milli) {
 }
 
 @end
-
