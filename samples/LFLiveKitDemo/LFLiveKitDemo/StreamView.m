@@ -131,9 +131,10 @@
 			if (_self.startLiveButton.selected) {
 				[_self.startLiveButton setTitle:@"stop" forState:UIControlStateNormal];
 				LFStreamInfo *stream = [LFStreamInfo new];
-				//				stream.url = @"rtmp://192.168.4.26:1935/live/te";
-				//				stream.url = @"rtmp://stream-staging-eu.mycujoo.tv/live/18b98ecedc10411a8fe392629949aaed";
-				stream.url = @"rtmp://stream.mycujoo.tv/live/6e672ca99aa84c009d8031e94d7867f6";
+//				stream.url = @"rtmp://192.168.4.26:1935/live/te";
+//				stream.url = @"rtmp://stream-staging-eu.mycujoo.tv/live/18b98ecedc10411a8fe392629949aaed";
+//				stream.url = @"rtmp://stream.mycujoo.tv/live/6e672ca99aa84c009d8031e94d7867f6";
+				stream.url = @"rtmp://192.168.2.78:1935/live/te";
 				[_self.session startLive:stream];
 				_self.session.saveLocalVideo = YES;
 				NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
