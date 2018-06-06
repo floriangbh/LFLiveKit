@@ -276,17 +276,20 @@ SAVC(mp4a);
 
 	*enc++ = AMF_OBJECT;
 
-	AVal ctext;
-	ctext.av_val = strdup(text.UTF8String);
-	sprintf(ctext.av_val, "sadf %d", cnt);
-	//	NSLog(@"cnt: %d");
-	ctext.av_len = strlen(ctext.av_val);
+	const char *ctext = text.UTF8String;
+	char *cpy = calloc(text.length + 1, 1);
+	strncpy(cpy, ctext, text.length);
+	AVal sub;
+	sub.av_val = cpy;
+	sub.av_len = strlen(sub.av_val);
 
-	enc = AMF_EncodeNamedString(enc, pend, &av_text, &ctext);
+	enc = AMF_EncodeNamedString(enc, pend, &av_text, &sub);
 
 	*enc++ = 0;
 	*enc++ = 0;
 	*enc++ = AMF_OBJECT_END;
+
+	free(cpy);
 
 	packet.m_nBodySize = (uint32_t)(enc - packet.m_body);
 	if (!RTMP_SendPacket(_rtmp, &packet, FALSE)) {
@@ -446,7 +449,9 @@ Failed:
 {
 	cnt++;
 //	[self sendMetaData];
-	[self sendMetaData2];
+//	[self sendMetaData2];
+//	[self sendSubtitle:@"asd3322"];
+	/// send subtitle:
 }
 
 - (void)sendMetaData2 {
