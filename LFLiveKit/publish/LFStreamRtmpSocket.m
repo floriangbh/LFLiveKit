@@ -31,6 +31,7 @@ static const NSInteger ReconnectionIntervalSeconds = 10;
 
 #define SAVC(x)    static const AVal av_ ## x = AVC(#x)
 
+static const AVal av_flashVer = AVC("FMLE/3.0 (compatible; LFLiveKit/2.4.0)");
 static const AVal av_setDataFrame = AVC("@setDataFrame");
 static const AVal av_SDKVersion = AVC("LFLiveKit 2.4.0");
 static const AVal av_TestCaption = AVC("Test Caption");
@@ -330,6 +331,9 @@ SAVC(mp4a);
 //    _rtmp->m_userData = (__bridge void *)self;
     _rtmp->m_msgCounter = 1;
     _rtmp->Link.timeout = RTMP_RECEIVE_TIMEOUT;
+
+    // send flash version
+    _rtmp->Link.flashVer = av_flashVer;
     
     //设置可写，即发布流，这个函数必须在连接前使用，否则无效
     RTMP_EnableWrite(_rtmp);
